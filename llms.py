@@ -174,7 +174,8 @@ def batch_call(
     model: str,
     service: str,
     client: Union[OpenAI, genai.GenerativeModel],
-    rpm: int = 1000000,
+    rpt: int = 1000000,
+    t: int = 60.1,
     max_tokens: int = 1024,
     temperature: float = 0.0,
     response_format: Optional[Dict[str, str]] = None
@@ -213,15 +214,15 @@ def batch_call(
     pbar = tqdm.tqdm(total=len(batch_messages))
     all_completions = []
     curr_index = 0
-    for batch in chunks(batch_messages, rpm):
+    for batch in chunks(batch_messages, rpt):
         start = time.time()
         completions = batch_completion(batch)
         end = time.time()
         pbar.set_description(f"Batch completed in {end - start:.2f}s")
 
-        if curr_index + rpm < len(batch_messages):
-            time.sleep(max(0, 60.1 - (end - start)))
-        curr_index += rpm
+        if curr_index + rpt < len(batch_messages):
+            time.sleep(max(0, t - (end - start)))
+        curr_index += rpt
 
         pbar.update(len(batch))
         all_completions.extend(completions)
